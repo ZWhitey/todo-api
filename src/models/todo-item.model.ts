@@ -26,6 +26,10 @@ export class TodoItem extends Entity {
   })
   finishAt?: string;
 
+  @property({
+    type: 'number',
+  })
+  todoId?: number;
 
   constructor(data?: Partial<TodoItem>) {
     super(data);
