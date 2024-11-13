@@ -4,12 +4,14 @@ import {
   del,
   get,
   getModelSchemaRef,
+  HttpErrors,
   param,
   patch,
   post,
   requestBody,
   response,
 } from '@loopback/rest';
+import _ from 'lodash';
 import {Todo} from '../models';
 import {TodoRepository} from '../repositories';
 import {
@@ -101,12 +103,22 @@ export class TodoController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Todo, {partial: true}),
+          schema: getModelSchemaRef(Todo, {
+            partial: true,
+            exclude: ['id', 'createdAt', 'updatedAt'],
+          }),
         },
       },
     })
     todo: Todo,
   ): Promise<void> {
+    todo.updatedAt = new Date().toISOString();
+    if (
+      !_.isNil(todo.status) &&
+      !_.includes([TodoStatus.ACTIVE, TodoStatus.INACTIVE], todo.status)
+    ) {
+      throw new HttpErrors.BadRequest('Invalid status');
+    }
     await this.todoRepository.updateById(id, todo);
   }
 
