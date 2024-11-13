@@ -30,14 +30,6 @@ export class TodoService {
     public todoItemRepository: TodoItemRepository,
   ) {}
 
-  async find(filter?: any): Promise<Todo[]> {
-    return this.todoRepository.find(filter);
-  }
-
-  async findById(id: number): Promise<Todo> {
-    return this.todoRepository.findById(id);
-  }
-
   async createTodo(todo: CreateTodoProps): Promise<Todo> {
     if (_.isNil(todo.title)) {
       throw new Error('Title is required');
@@ -67,14 +59,6 @@ export class TodoService {
     }
 
     return newTodo;
-  }
-
-  async deleteById(id: number): Promise<void> {
-    await this.todoRepository.deleteById(id);
-  }
-
-  async updateById(id: number, todo: Todo): Promise<void> {
-    await this.todoRepository.updateById(id, todo);
   }
 
   async createTodoItem(
