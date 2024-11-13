@@ -54,7 +54,7 @@ export class TodoController {
     })
     todo: CreateTodoProps,
   ): Promise<Todo> {
-    return this.todoService.create(todo);
+    return this.todoService.createTodo(todo);
   }
 
   @get('/todos')

@@ -38,7 +38,7 @@ export class TodoService {
     return this.todoRepository.findById(id);
   }
 
-  async create(todo: CreateTodoProps): Promise<Todo> {
+  async createTodo(todo: CreateTodoProps): Promise<Todo> {
     if (_.isNil(todo.title)) {
       throw new Error('Title is required');
     }
@@ -61,13 +61,8 @@ export class TodoService {
     if (_.isArray(todoItems)) {
       newTodo.todoItems = [];
       for (const item of todoItems) {
-        const newItem = await this.createTodoItem(newTodo.id, item).catch(
-          err => {
-            console.error('create todo item failed');
-            throw err;
-          },
-        );
-        newTodo.todoItems.push(newItem);
+        const newTodoItem = await this.createTodoItem(newTodo.id, item);
+        newTodo.todoItems.push(newTodoItem);
       }
     }
 
@@ -92,10 +87,9 @@ export class TodoService {
     if (_.isNil(todoId)) {
       throw new Error('TodoId is required');
     }
-
-    return this.todoItemRepository.create(
-      _.merge(todoItem, {todoId, done: false}),
-    );
+    return this.todoRepository
+      .todoItems(todoId)
+      .create(_.merge(todoItem, {done: false}));
   }
 
   /*
