@@ -5,7 +5,7 @@ import {TodoItem} from '../models';
 import {Todo} from '../models/todo.model';
 import {TodoItemRepository, TodoRepository} from '../repositories';
 
-enum TodoStatus {
+export enum TodoStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
   DELETED = 'DELETED',

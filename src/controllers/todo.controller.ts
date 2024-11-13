@@ -12,7 +12,11 @@ import {
 } from '@loopback/rest';
 import {Todo} from '../models';
 import {TodoRepository} from '../repositories';
-import {CreateTodoProps, TodoService} from '../services/todo.service';
+import {
+  CreateTodoProps,
+  TodoService,
+  TodoStatus,
+} from '../services/todo.service';
 
 export class TodoController {
   constructor(
@@ -112,6 +116,6 @@ export class TodoController {
     description: 'Todo DELETE success',
   })
   async deleteById(@param.path.number('id') id: number): Promise<void> {
-    await this.todoRepository.deleteById(id);
+    await this.todoRepository.updateById(id, {status: TodoStatus.DELETED});
   }
 }

@@ -3,6 +3,7 @@ import {
   del,
   get,
   getModelSchemaRef,
+  HttpErrors,
   param,
   patch,
   requestBody,
@@ -10,12 +11,15 @@ import {
 } from '@loopback/rest';
 import _ from 'lodash';
 import {TodoItem} from '../models';
-import {TodoItemRepository} from '../repositories';
+import {TodoItemRepository, TodoRepository} from '../repositories';
+import {TodoStatus} from '../services';
 
 export class TodoItemController {
   constructor(
     @repository(TodoItemRepository)
     public todoItemRepository: TodoItemRepository,
+    @repository(TodoRepository)
+    public todoRepository: TodoRepository,
   ) {}
 
   @get('/todo-items/{id}')
@@ -49,6 +53,13 @@ export class TodoItemController {
     })
     todoItem: TodoItem,
   ): Promise<void> {
+    const item = await this.todoItemRepository.findById(id);
+    const todo = await this.todoRepository.findById(item.todoId);
+    if (todo.status === TodoStatus.DELETED) {
+      throw new HttpErrors.NotFound(
+        `Entity not found: Todo with id ${item.todoId}`,
+      );
+    }
     if (!_.isNil(todoItem.done) && todoItem.done) {
       todoItem.finishAt = new Date().toISOString();
     }

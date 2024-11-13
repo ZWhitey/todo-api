@@ -1,7 +1,15 @@
 import {Filter, repository} from '@loopback/repository';
-import {get, getModelSchemaRef, param, post, requestBody} from '@loopback/rest';
+import {
+  get,
+  getModelSchemaRef,
+  HttpErrors,
+  param,
+  post,
+  requestBody,
+} from '@loopback/rest';
 import {Todo, TodoItem} from '../models';
 import {TodoRepository} from '../repositories';
+import {TodoStatus} from '../services';
 
 export class TodoTodoItemController {
   constructor(
@@ -49,6 +57,10 @@ export class TodoTodoItemController {
     })
     todoItem: Omit<TodoItem, 'id'>,
   ): Promise<TodoItem> {
+    const todo = await this.todoRepository.findById(id);
+    if (todo.status === TodoStatus.DELETED) {
+      throw new HttpErrors.NotFound(`Entity not found: Todo with id ${id}`);
+    }
     return this.todoRepository.todoItems(id).create(todoItem);
   }
 }
