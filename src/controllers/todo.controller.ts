@@ -1,12 +1,5 @@
 import {service} from '@loopback/core';
-import {
-  Count,
-  CountSchema,
-  Filter,
-  FilterExcludingWhere,
-  repository,
-  Where,
-} from '@loopback/repository';
+import {Filter, FilterExcludingWhere, repository} from '@loopback/repository';
 import {
   del,
   get,
@@ -14,7 +7,6 @@ import {
   param,
   patch,
   post,
-  put,
   requestBody,
   response,
 } from '@loopback/rest';
@@ -65,15 +57,6 @@ export class TodoController {
     return this.todoService.create(todo);
   }
 
-  @get('/todos/count')
-  @response(200, {
-    description: 'Todo model count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async count(@param.where(Todo) where?: Where<Todo>): Promise<Count> {
-    return this.todoRepository.count(where);
-  }
-
   @get('/todos')
   @response(200, {
     description: 'Array of Todo model instances',
@@ -88,25 +71,6 @@ export class TodoController {
   })
   async find(@param.filter(Todo) filter?: Filter<Todo>): Promise<Todo[]> {
     return this.todoRepository.find(filter);
-  }
-
-  @patch('/todos')
-  @response(200, {
-    description: 'Todo PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Todo, {partial: true}),
-        },
-      },
-    })
-    todo: Todo,
-    @param.where(Todo) where?: Where<Todo>,
-  ): Promise<Count> {
-    return this.todoRepository.updateAll(todo, where);
   }
 
   @get('/todos/{id}')
@@ -141,17 +105,6 @@ export class TodoController {
     todo: Todo,
   ): Promise<void> {
     await this.todoRepository.updateById(id, todo);
-  }
-
-  @put('/todos/{id}')
-  @response(204, {
-    description: 'Todo PUT success',
-  })
-  async replaceById(
-    @param.path.number('id') id: number,
-    @requestBody() todo: Todo,
-  ): Promise<void> {
-    await this.todoRepository.replaceById(id, todo);
   }
 
   @del('/todos/{id}')
