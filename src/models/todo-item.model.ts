@@ -1,6 +1,17 @@
 import {Entity, model, property} from '@loopback/repository';
 
-@model()
+@model({
+  settings: {
+    foreignKeys: {
+      todoId: {
+        name: 'fk_todo_item_todo_id',
+        foreignKey: 'todoId',
+        entityKey: 'id',
+        entity: 'Todo',
+      },
+    },
+  },
+})
 export class TodoItem extends Entity {
   @property({
     type: 'number',
