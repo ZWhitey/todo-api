@@ -1,5 +1,5 @@
 import {service} from '@loopback/core';
-import {Filter, FilterExcludingWhere, repository} from '@loopback/repository';
+import {Filter, repository} from '@loopback/repository';
 import {
   del,
   get,
@@ -86,11 +86,10 @@ export class TodoController {
       },
     },
   })
-  async findById(
-    @param.path.number('id') id: number,
-    @param.filter(Todo, {exclude: 'where'}) filter?: FilterExcludingWhere<Todo>,
-  ): Promise<Todo> {
-    return this.todoRepository.findById(id, filter);
+  async findById(@param.path.number('id') id: number): Promise<Todo> {
+    return this.todoRepository.findById(id, {
+      include: [{relation: 'todoItems'}],
+    });
   }
 
   @patch('/todos/{id}')
