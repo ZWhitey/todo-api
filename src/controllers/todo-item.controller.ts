@@ -1,4 +1,4 @@
-import {FilterExcludingWhere, repository} from '@loopback/repository';
+import {repository} from '@loopback/repository';
 import {
   del,
   get,
@@ -8,6 +8,7 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import _ from 'lodash';
 import {TodoItem} from '../models';
 import {TodoItemRepository} from '../repositories';
 
@@ -26,12 +27,8 @@ export class TodoItemController {
       },
     },
   })
-  async findById(
-    @param.path.number('id') id: number,
-    @param.filter(TodoItem, {exclude: 'where'})
-    filter?: FilterExcludingWhere<TodoItem>,
-  ): Promise<TodoItem> {
-    return this.todoItemRepository.findById(id, filter);
+  async findById(@param.path.number('id') id: number): Promise<TodoItem> {
+    return this.todoItemRepository.findById(id);
   }
 
   @patch('/todo-items/{id}')
@@ -43,12 +40,18 @@ export class TodoItemController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(TodoItem, {partial: true}),
+          schema: getModelSchemaRef(TodoItem, {
+            partial: true,
+            exclude: ['todoId', 'finishAt'],
+          }),
         },
       },
     })
     todoItem: TodoItem,
   ): Promise<void> {
+    if (!_.isNil(todoItem.done) && todoItem.done) {
+      todoItem.finishAt = new Date().toISOString();
+    }
     await this.todoItemRepository.updateById(id, todoItem);
   }
 
