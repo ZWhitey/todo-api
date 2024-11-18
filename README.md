@@ -42,6 +42,25 @@
 3.  建立 db schema `npm run migrate`
 4.  啟動伺服器 `npm start`
 
+# schema
+
+## Todo
+
+- id - 自動生成 id
+- title - 標題
+- subtitle - 副標題
+- status - 狀態 `ACTIVE | INACTIVE | DELETED`
+- updatedAt - 更新時間
+- createdAt - 建立時間
+
+## Todo Item
+
+- id - 自動生成 id
+- content - 內容
+- done - 是否完成
+- finishAt - 完成時間
+- todoId - todo foreign key
+
 # todo
 
 This application is generated using [LoopBack 4 CLI](https://loopback.io/doc/en/lb4/Command-line-interface.html) with the
