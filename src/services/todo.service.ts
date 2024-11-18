@@ -1,5 +1,5 @@
 import {/* inject, */ BindingScope, injectable} from '@loopback/core';
-import {repository} from '@loopback/repository';
+import {repository, Transaction} from '@loopback/repository';
 import _ from 'lodash';
 import {TodoItem} from '../models';
 import {Todo} from '../models/todo.model';
@@ -34,36 +34,46 @@ export class TodoService {
     if (_.isNil(todo.title)) {
       throw new Error('Title is required');
     }
-    const todoItems = todo.todoItems;
-    todo = _.omit(todo, ['todoItems']);
+    const tx = await this.todoRepository.beginTransaction();
+    try {
+      const todoItems = todo.todoItems;
+      todo = _.omit(todo, ['todoItems']);
 
-    const now = new Date().toISOString();
-    const newTodo = await this.todoRepository.create(
-      _.merge(todo, {
-        createdAt: now,
-        updatedAt: now,
-        status: TodoStatus.ACTIVE,
-      }),
-    );
+      const now = new Date().toISOString();
+      const newTodo = await this.todoRepository.create(
+        _.merge(todo, {
+          createdAt: now,
+          updatedAt: now,
+          status: TodoStatus.ACTIVE,
+        }),
+        {transaction: tx},
+      );
 
-    if (_.isNil(newTodo.id)) {
-      throw new Error('Create todo failed');
-    }
-
-    if (_.isArray(todoItems)) {
-      newTodo.todoItems = [];
-      for (const item of todoItems) {
-        const newTodoItem = await this.createTodoItem(newTodo.id, item);
-        newTodo.todoItems.push(newTodoItem);
+      if (_.isNil(newTodo.id)) {
+        throw new Error('Create todo failed');
       }
-    }
 
-    return newTodo;
+      if (_.isArray(todoItems)) {
+        newTodo.todoItems = [];
+        for (const item of todoItems) {
+          const newTodoItem = await this.createTodoItem(newTodo.id, item, tx);
+          newTodo.todoItems.push(newTodoItem);
+        }
+      }
+      await tx.commit();
+      return newTodo;
+    } catch (error) {
+      if (tx.isActive()) {
+        await tx.rollback();
+      }
+      throw error;
+    }
   }
 
   async createTodoItem(
     todoId: number,
     todoItem: CreateTodoItemProps,
+    tx: Transaction,
   ): Promise<TodoItem> {
     if (_.isNil(todoItem.content)) {
       throw new Error('Content is required');
@@ -73,7 +83,7 @@ export class TodoService {
     }
     return this.todoRepository
       .todoItems(todoId)
-      .create(_.merge(todoItem, {done: false}));
+      .create(_.merge(todoItem, {done: false}), {transaction: tx});
   }
 
   /*
