@@ -7,6 +7,7 @@ import {
   post,
   requestBody,
 } from '@loopback/rest';
+import _ from 'lodash';
 import {Todo, TodoItem} from '../models';
 import {TodoRepository} from '../repositories';
 import {TodoStatus} from '../services';
@@ -54,7 +55,7 @@ export class TodoTodoItemController {
         'application/json': {
           schema: getModelSchemaRef(TodoItem, {
             title: 'NewTodoItemInTodo',
-            exclude: ['id', 'todoId', 'finishAt'],
+            exclude: ['id', 'todoId', 'finishAt', 'done'],
           }),
         },
       },
@@ -65,6 +66,8 @@ export class TodoTodoItemController {
     if (todo.status === TodoStatus.DELETED) {
       throw new HttpErrors.NotFound(`Entity not found: Todo with id ${id}`);
     }
-    return this.todoRepository.todoItems(id).create(todoItem);
+    return this.todoRepository
+      .todoItems(id)
+      .create(_.merge(todoItem, {done: false}));
   }
 }
