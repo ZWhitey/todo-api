@@ -32,6 +32,10 @@ export class TodoTodoItemController {
     @param.path.number('id') id: number,
     @param.query.object('filter') filter?: Filter<TodoItem>,
   ): Promise<TodoItem[]> {
+    const todo = await this.todoRepository.findById(id);
+    if (todo.status === TodoStatus.DELETED) {
+      throw new HttpErrors.NotFound(`Entity not found: Todo with id ${id}`);
+    }
     return this.todoRepository.todoItems(id).find(filter);
   }
 

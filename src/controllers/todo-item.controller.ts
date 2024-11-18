@@ -32,6 +32,11 @@ export class TodoItemController {
     },
   })
   async findById(@param.path.number('id') id: number): Promise<TodoItem> {
+    const todoItem = await this.todoItemRepository.findById(id);
+    const todo = await this.todoRepository.findById(todoItem.todoId);
+    if (todo.status === TodoStatus.DELETED) {
+      throw new HttpErrors.NotFound(`Entity not found: TodoItem with id ${id}`);
+    }
     return this.todoItemRepository.findById(id);
   }
 
@@ -71,6 +76,11 @@ export class TodoItemController {
     description: 'TodoItem DELETE success',
   })
   async deleteById(@param.path.number('id') id: number): Promise<void> {
+    const todoItem = await this.todoItemRepository.findById(id);
+    const todo = await this.todoRepository.findById(todoItem.todoId);
+    if (todo.status === TodoStatus.DELETED) {
+      throw new HttpErrors.NotFound(`Entity not found: TodoItem with id ${id}`);
+    }
     await this.todoItemRepository.deleteById(id);
   }
 }
